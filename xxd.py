@@ -1,36 +1,28 @@
-y=raw_input("enter file name :\t")
+import sys
+import os.path
+def xxd(y):
+	f=open(y,'r')
+	offset=0
+	while True:
+		txt=f.read(16)
+		if not txt:
+			break
 
-f=open(y,'r')
-vari=f.read().replace('\n','.').replace('\t','.')
-x=vari
-parts = [x[i:i+16] for i in range(0,len(x),16)]
-print('\n'.join(map(str, parts)))
-print('\n')
-
-
-hexa=vari.encode('hex')
-z=hexa
-hexparts = [z[j:j+4] for j in range(0,len(z),4)]
-b = ' '.join(map(str,hexparts))
-
-chunk, chunk_size = len(b), len(b)//10
-y=[b[k:k+chunk_size] for k in range(0, chunk, chunk_size)]
-for ele in y:
-	print ele
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		hexa=[]
+		for i in txt:
+			hexa.append('%02x'%ord(i))
+		hexablock=[]
+		for n in range (0,len(hexa),2):
+			hexablock.append(''.join(hexa[n:n+2]))
 	
+		letters=txt.replace('\n','.').replace('\t','.')
+		letterblock=[]
+		letterblock.append(letters)
+		off_set=('%08x'%(offset*16))	
+		print('{0}: {1:<39}   {2}'.format (off_set,' '.join(hexablock),' '.join(letterblock)))
+		offset+=1
 
-
+if not os.path.exists(sys.argv[1]):
+	print("Wrong Input")
+	sys.exit(1)
+xxd(sys.argv[1])			
