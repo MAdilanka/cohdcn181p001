@@ -5,15 +5,16 @@ try:
 			server_send=raw_input('server :')
 			conn.send(server_send)
 			if server_send=="q" :
-				client.close()
-				print "\n.....chat closed......"
-				os._exit(1)
+					sock.close()
+					print "\n.....chat closed......"
+					os._exit(1)
+		
 	def recieve():
 		while True:
 			data = conn.recv(1024) 
 			print '\nClient :' ,data
 			if data == "q":
-				client.close()
+				sock.close()
 				print '\n.....chat closed......'
 				os._exit(1)
 			if not data:
