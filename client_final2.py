@@ -32,5 +32,5 @@ while True:
 		sys.exit()
 	else:
 		if not data :
-	
+			break
 
