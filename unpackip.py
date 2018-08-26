@@ -7,8 +7,6 @@ sock = socket.socket(socket.AF_PACKET,socket.SOCK_RAW, socket.htons(0x0800))
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock.bind(('ens33', 0))
 
-
-
 while True:
 	
 	packet=sock.recvfrom(65565)
@@ -29,16 +27,16 @@ while True:
 	udp = unpack('!HHHH' ,udp_hed)
 
 
-	print '\nVersion        :' ,iph[0]>> 4
-	print 'Ip Header Length :' ,iph[0]& 0xF
-	print 'TTL 		:' ,iph[5] 
-	print 'Protocol 	:' ,iph[6] 
-	print 'source IP Address:' ,socket.inet_ntoa(iph[8]);
-	print 'Dest addr	:' ,socket.inet_ntoa(iph[9]);
+	print '\nVersion        :',iph[0]>> 4
+	print 'Ip Header Length :',iph[0]& 0xF
+	print 'TTL 		:',iph[5] 
+	print 'Protocol 	:',iph[6] 
+	print 'source IP Address:',socket.inet_ntoa(iph[8]);
+	print 'Dest addr	:',socket.inet_ntoa(iph[9]);
 
-	print 'Source Mac 	:',hexlify(eth[0])
-	print 'Destination Mac  :' ,hexlify(eth[1])
-	print 'TYPE		:' ,eth[2]
+	print 'source mac       :',hexlify(eth[0])
+	print 'Destination Mac  :',hexlify(eth[1])
+	print 'TYPE		:',eth[2]
 
 	if iph[6] == 1 :
 		print '\n\t\ticmp packet'
