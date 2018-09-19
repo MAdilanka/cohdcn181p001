@@ -79,7 +79,7 @@ try :
 			continue
 
 		else :
-			print ("%s bytes from: %s: icmp_seq =%s ttl =%s %s ms" %((len(packet)),socket.inet_ntoa(iph[8]) ,icmp[4] ,iph[5] ,time_out))
+			print ("from: %s: icmp_seq =%s ttl =%s %s ms" %(socket.inet_ntoa(iph[8]) ,icmp[4] ,iph[5] ,time_out))
 		time.sleep(1)
 		f+=1
 		v=i-f
