@@ -17,7 +17,7 @@ except socket.gaierror:
 	print "Invalid address !"
 	sys.exit()
 except socket.herror:
-	print "invalid IPV4 Address Or Unreachable ! \n"
+	print "Unreachable Address ! \n"
 	dst_name=dst
 	pass
 
