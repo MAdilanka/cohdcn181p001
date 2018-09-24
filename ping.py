@@ -2,8 +2,24 @@ import os
 import struct , socket
 import sys ,time ,select
 from struct import *
+import re
 
 dst =sys.argv[1]
+regex = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
+result = regex.match(dst)
+try:
+	dst_name=socket.gethostbyaddr(dst)[2]
+	dst_name=''.join(dst_name)
+	if not result:
+		dst_name=socket.gethostbyaddr(dst)[2]
+		dst_name=''.join(dst_name)
+except socket.gaierror:
+	print "Invalid address !"
+	sys.exit()
+except socket.herror:
+	print "invalid IPV4 Address ! \n"
+	sys.exit()
+
 sock =socket.socket(socket.AF_INET, socket.SOCK_RAW ,1)
 sock.settimeout(5)
 
@@ -29,14 +45,14 @@ def checksum(source_string):
     answer = answer & 0xffff
     answer = answer >> 8 | (answer << 8 & 0xff00)
     return answer
-print ("\nPinging %s . . . . \n" %(dst))
+print ("\nPinging %s . . . . \n" %(dst_name))
 i=0
 f=0
 try :
 	while i<4 :
 		i+=1
 
-		dest_ip =dst
+		dest_ip =dst_name
 		src_ip ='192.168.225.128'
 		#icmp header	
 		icmp_type =  8
@@ -78,7 +94,7 @@ try :
 			print '%s : Destination unreachable !'%(dst)
 			continue
 
-		elif socket.inet_ntoa(iph[8]) == dst :
+		elif socket.inet_ntoa(iph[8]) == dst_name :
 			print ("%s bytes from: %s: icmp_seq =%s ttl =%s %s ms" %((len(packet)),socket.inet_ntoa(iph[8]) ,icmp[4] ,iph[5] ,time_out))
 		else :
 			i-=1
