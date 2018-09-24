@@ -78,8 +78,11 @@ try :
 			print '%s : Destination unreachable !'%(dst)
 			continue
 
+		elif socket.inet_ntoa(iph[8]) == dst :
+			print ("%s bytes from: %s: icmp_seq =%s ttl =%s %s ms" %((len(packet)),socket.inet_ntoa(iph[8]) ,icmp[4] ,iph[5] ,time_out))
 		else :
-			print ("from: %s: icmp_seq =%s ttl =%s %s ms" %(socket.inet_ntoa(iph[8]) ,icmp[4] ,iph[5] ,time_out))
+			i-=1
+			continue
 		time.sleep(1)
 		f+=1
 		v=i-f
