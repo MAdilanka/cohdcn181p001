@@ -7,10 +7,19 @@ import re
 dst = sys.argv[1]
 regex = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
 result = regex.match(dst)
-dst_name=socket.gethostbyaddr(dst)[0]
-if not result:
-	ds_name=socket.gethostbyaddr(dst)[2]
-	dst_name=''.join(ds_name)
+
+try :
+	dst_name=socket.gethostbyaddr(dst)[0]
+	if not result:
+		ds_name=socket.gethostbyaddr(dst)[2]
+		dst_name=''.join(ds_name)
+except socket.gaierror:
+	print "Invalid address !"
+	sys.exit()
+except socket.herror:
+	print "invalid IPV4 Address Or Unreachable ! \n"
+	dst_name=dst
+	pass
 
 print("Traceroute to %s %s  ,30 hops max" %(dst,dst_name))
 def checksum(source_string):
