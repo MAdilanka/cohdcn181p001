@@ -7,19 +7,18 @@ import re
 dst =sys.argv[1]
 regex = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
 result = regex.match(dst)
-try:
-	dst_name=socket.gethostbyaddr(dst)[2]
-	dst_name=''.join(dst_name)
-	if not result:
+dst_name=dst
+if not result:
+	try:
 		dst_name=socket.gethostbyaddr(dst)[2]
 		dst_name=''.join(dst_name)
-except socket.gaierror:
-	print "Invalid address !"
-	sys.exit()
-except socket.herror:
-	print "invalid IPV4 Address ! \n"
-	sys.exit()
-
+	except socket.gaierror:
+		print "Invalid address !"
+		sys.exit()
+	except socket.herror:
+		print "invalid Address! \n"
+		sys.exit()
+	
 sock =socket.socket(socket.AF_INET, socket.SOCK_RAW ,1)
 sock.settimeout(5)
 
@@ -69,15 +68,17 @@ try :
 		packet=icmp_header2
 
 		send_time=time.time()
-	
-		sock.sendto(packet ,(dest_ip,1))
 		try :
+			sock.sendto(packet ,(dest_ip,1))
 			icmp_packet ,addr=sock.recvfrom(1024)
+		except socket.gaierror:
+			print "Invalid IPV4 Address!"
+			sys.exit()			
 		except socket.timeout :
 			print 'Requested Time Out'
 			f+=1
 			v=i-f
-			p=(v/i)*100
+			p=(f/i)*100
 			continue
 		recv_time =time.time()
 		icmp_header=icmp_packet[20:28]
@@ -92,6 +93,9 @@ try :
 			
 		if icmp[0] == 3 :
 			print '%s : Destination unreachable !'%(dst)
+			f+=1
+			v=i-f
+			p=(f/i)*100
 			continue
 
 		elif socket.inet_ntoa(iph[8]) == dst_name :
@@ -100,9 +104,8 @@ try :
 			i-=1
 			continue
 		time.sleep(1)
-		f+=1
 		v=i-f
-		p=(v/i)*100
+		p=(i-v)*100
 	print ("-------- %s Ping Statistics ---------"%(dst))
 	print ("%s packets Transmited   %s packets recieved %.2f packet loss "%(i ,v,p))
 	sys.exit()
