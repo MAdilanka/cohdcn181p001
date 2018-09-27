@@ -19,12 +19,12 @@ if not result:
 		print "invalid Address! \n"
 		sys.exit()
 	
-sock =socket.socket(socket.AF_INET, socket.SOCK_RAW ,1)
+sock = socket.socket(socket.AF_INET,socket.SOCK_RAW,socket.IPPROTO_RAW)
 sock.settimeout(5)
 
-socktcp = socket.socket(socket.AF_PACKET,socket.SOCK_RAW, socket.htons(0x0800))
-socktcp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-socktcp.settimeout(5)
+rsock = socket.socket(socket.AF_INET,socket.SOCK_RAW,1)
+rsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+rsock.settimeout(5)
 	
 def checksum(source_string):
     sum = 0
@@ -44,6 +44,25 @@ def checksum(source_string):
     answer = answer & 0xffff
     answer = answer >> 8 | (answer << 8 & 0xff00)
     return answer
+#ip_header
+ip_ver_ihl=(4<<4)+5
+ip_tos=0x00
+ip_len=0
+ip_id=0xc88f
+ip_flag=0
+ip_ttl=64
+ip_pro=1
+ip_check=0
+ip_src=socket.inet_aton("192.168.43.229")
+try :
+	ip_des=socket.inet_aton(dst_name)
+except socket.error:
+	print "Invalid IPV4 Address!"
+	sys.exit()
+ip_header=struct.pack('!BBHHHBBH4s4s',ip_ver_ihl,ip_tos,ip_len,ip_id,ip_flag,ip_ttl,ip_pro,ip_check,ip_src,ip_des)
+ip_ch = checksum(ip_header)
+ip_header2=struct.pack('!BBHHHBBH4s4s',ip_ver_ihl,ip_tos,ip_len,ip_id,ip_flag,ip_ttl,ip_pro,ip_ch,ip_src,ip_des)
+
 print ("\nPinging %s . . . . \n" %(dst_name))
 i=0
 f=0
@@ -65,12 +84,12 @@ try :
 
 		icmp_sum =checksum(psh)
 		icmp_header2=struct.pack('!BBHHH', icmp_type, icmp_code, icmp_sum, icmp_id, icmp_seq)
-		packet=icmp_header2
+		packet=ip_header2+icmp_header2
 
 		send_time=time.time()
 		try :
 			sock.sendto(packet ,(dest_ip,1))
-			icmp_packet ,addr=sock.recvfrom(1024)
+			packet ,addr=rsock.recvfrom(1024)
 		except socket.gaierror:
 			print "Invalid IPV4 Address!"
 			sys.exit()			
@@ -81,11 +100,9 @@ try :
 			p=(f/i)*100
 			continue
 		recv_time =time.time()
-		icmp_header=icmp_packet[20:28]
+		icmp_header=packet[20:28]
 		icmp = unpack('!BBHHH' ,icmp_header)
-		ip_packet=socktcp.recvfrom(1024)
-		ip_packet = ip_packet[0]
-		ip_header=ip_packet[14:34]
+		ip_header=packet[:20]
 		iph = unpack('!BBHHHBBH4s4s' ,ip_header)
 		time_taken=recv_time-send_time
 	
@@ -99,7 +116,7 @@ try :
 			continue
 
 		elif socket.inet_ntoa(iph[8]) == dst_name :
-			print ("%s bytes from: %s: icmp_seq =%s ttl =%s %s ms" %((len(packet)),socket.inet_ntoa(iph[8]) ,icmp[4] ,iph[5] ,time_out))
+			print ("from: %s: icmp_seq =%s ttl =%s %s ms" %(socket.inet_ntoa(iph[8]) ,icmp[4] ,iph[5] ,time_out))
 		else :
 			i-=1
 			continue
